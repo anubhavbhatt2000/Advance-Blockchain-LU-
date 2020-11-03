@@ -1,0 +1,53 @@
+pragma solidity ^0.4.19;
+
+contract Bank {
+
+    struct Account {
+        address owner;
+        uint balance;
+    }
+
+    mapping(address => Account) internal accounts;
+
+    modifier hasAccount() {
+        Account memory account = accounts[msg.sender];
+        require(account.owner != address(0));
+        _;
+    }
+
+    modifier doesNotHaveAccount() {
+        Account memory account = accounts[msg.sender];
+        require(account.owner == address(0));
+        _;
+    }
+
+    function createAccount() public doesNotHaveAccount returns (bool success) {
+        Account memory newAccount;
+        newAccount.owner = msg.sender;
+        newAccount.balance = 0;
+        accounts[msg.sender] = newAccount;
+        return true;
+    }
+
+    function getBalance() public view hasAccount returns (uint balance) {
+        Account memory account = accounts[msg.sender];
+
+        return account.balance;
+    }
+
+    function withdraw(uint amount) public hasAccount returns (uint balance) {
+        Account storage account = accounts[msg.sender];
+
+        account.balance = account.balance - amount;
+
+        return account.balance;
+    }
+
+    function deposit(uint amount) public hasAccount returns (uint balance) {
+        Account storage account = accounts[msg.sender];
+
+        account.balance = account.balance + amount;
+
+        return account.balance;
+    }
+}
